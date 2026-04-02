@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Ability.CotacaoDolar.Api/Ability.CotacaoDolar.Api.csproj" Id="9f93aa43-ee37-4923-bd25-42702ebc86ed" />
+  <Project Path="Ability.CotacaoDolar.Core/Ability.CotacaoDolar.Core.csproj" Id="13d0fecb-5752-4536-b4cf-0bc94d0eab97" />
+  <Project Path="Ability.CotacaoDolar.Infrastructure/Ability.CotacaoDolar.Infrastructure.csproj" Id="a0c93cdc-c6ec-4122-bdd9-12f4887e5056" />
+  <Project Path="Ability.CotacaoDolar.Worker/Ability.CotacaoDolar.Worker.csproj" Id="bd373b9f-97c3-4ee6-a817-844f0ef2c179" />
+</Solution>
