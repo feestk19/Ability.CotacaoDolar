@@ -1,24 +1,36 @@
+using Ability.CotacaoDolar.Core.Entities;
+using Ability.CotacaoDolar.Core.Interfaces;
+
 namespace Ability.CotacaoDolar.Worker
 {
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(IServiceProvider serviceProvider)
         {
-            _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            using var scope = _serviceProvider.CreateScope();
+
+            var repositorio = scope.ServiceProvider.GetRequiredService<ICotacaoDolarRepositorio>();
+
+            var cotacao = new RegistroCotacaoDolar
             {
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                }
-                await Task.Delay(1000, stoppingToken);
-            }
+                TaxaCompra = 5.10m,
+                TaxaVenda = 5.20m,
+                DataHoraColeta = DateTime.UtcNow,
+                DataHoraCriacao = DateTime.UtcNow
+            };
+
+            await repositorio.SalvarAsync(cotacao);
+
+            Console.WriteLine("Cotação salva com sucesso!");
+
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
     }
 }
