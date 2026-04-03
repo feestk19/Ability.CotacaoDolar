@@ -1,36 +1,46 @@
 using Ability.CotacaoDolar.Core.Entities;
 using Ability.CotacaoDolar.Core.Interfaces;
+using Ability.CotacaoDolar.Core.Services;
 
 namespace Ability.CotacaoDolar.Worker
 {
     public class Worker : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<Worker> _logger;
+        private readonly IConfiguration _configuration;
 
-        public Worker(IServiceProvider serviceProvider)
+        public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger;
+            _configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var scope = _serviceProvider.CreateScope();
-
-            var repositorio = scope.ServiceProvider.GetRequiredService<ICotacaoDolarRepositorio>();
-
-            var cotacao = new RegistroCotacaoDolar
+            while (!stoppingToken.IsCancellationRequested)
             {
-                TaxaCompra = 5.10m,
-                TaxaVenda = 5.20m,
-                DataHoraColeta = DateTime.UtcNow,
-                DataHoraCriacao = DateTime.UtcNow
-            };
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
 
-            await repositorio.SalvarAsync(cotacao);
+                    var servico = scope.ServiceProvider.GetRequiredService<ServicoColetaCotacaoDolar>();
+                    await servico.ColetarESalvarAsync();
 
-            Console.WriteLine("Cotação salva com sucesso!");
+                    _logger.LogInformation("Cotação do dólar coletada e salva com sucesso.");
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogError($"Erro ao coletar cotação: {ex}");
+                }
+
+                var minutos = _configuration.GetValue<int>("Worker:IntervaloMinutos");
+                await Task.Delay(TimeSpan.FromMinutes(minutos), stoppingToken);
+            }
+            
         }
     }
 }

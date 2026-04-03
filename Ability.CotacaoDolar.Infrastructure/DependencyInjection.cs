@@ -1,6 +1,8 @@
 ﻿using Ability.CotacaoDolar.Core.Interfaces;
+using Ability.CotacaoDolar.Core.Services;
 using Ability.CotacaoDolar.Infrastructure.Data;
 using Ability.CotacaoDolar.Infrastructure.Data.Repositories;
+using Ability.CotacaoDolar.Infrastructure.ExternalServices.BancoCentral;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,9 @@ public static class DependencyInjection
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<ICotacaoDolarRepositorio, CotacaoDolarRepositorio>();
+        services.AddScoped<ServicoColetaCotacaoDolar>();
+
+        services.AddHttpClient<ICotacaoDolarColetor, CotacaoDolarBancoCentralColetor>();
 
         return services;
     }
