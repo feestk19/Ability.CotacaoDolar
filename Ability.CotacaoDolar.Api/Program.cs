@@ -1,7 +1,8 @@
 using Ability.CotacaoDolar.Infrastructure;
+using Ability.CotacaoDolar.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
-using System.Security.Cryptography.Xml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,15 +23,25 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var contexto = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    contexto.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.RoutePrefix = string.Empty;
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ability.CotacaoDolar.Api v1");
+    });
 
     app.MapScalarApiReference(options =>
     {
-        options.WithTitle("API Cotação Dólar");
+        options.WithTitle("Ability.CotacaoDolar.Api v1");
         options.WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json");
     });
 }

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
   <Project Path="Ability.CotacaoDolar.Api/Ability.CotacaoDolar.Api.csproj" Id="9f93aa43-ee37-4923-bd25-42702ebc86ed" />
   <Project Path="Ability.CotacaoDolar.Core/Ability.CotacaoDolar.Core.csproj" Id="13d0fecb-5752-4536-b4cf-0bc94d0eab97" />
   <Project Path="Ability.CotacaoDolar.Infrastructure/Ability.CotacaoDolar.Infrastructure.csproj" Id="a0c93cdc-c6ec-4122-bdd9-12f4887e5056" />

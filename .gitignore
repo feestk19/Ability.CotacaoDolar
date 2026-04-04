@@ -483,6 +483,8 @@ $RECYCLE.BIN/
 
 # Banco SQLite (se não quiser versionar)
 *.db
+*.db-shm
+*.db-wal
 
 # Arquivos de dados
 /data/

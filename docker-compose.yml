@@ -1,0 +1,46 @@
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Ability.CotacaoDolar.Api/Dockerfile
+    container_name: ability-cotacao-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - cotacao_data:/data
+      - cotacao_logs:/logs
+    depends_on:
+      - seq
+  
+  worker:
+    build:
+      context: .
+      dockerfile: Ability.CotacaoDolar.Worker/Dockerfile
+    container_name: ability-cotacao-worker
+    environment:
+      DOTNET_ENVIRONMENT: Docker
+      Worker__IntervaloMinutos: 1
+    volumes:
+      - cotacao_data:/data
+      - cotacao_logs:/logs
+    depends_on:
+      - seq
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+volumes:
+  cotacao_data:
+  cotacao_logs:
+  seq_data:
