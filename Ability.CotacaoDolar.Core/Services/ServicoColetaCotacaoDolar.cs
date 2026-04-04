@@ -1,4 +1,6 @@
 ﻿using Ability.CotacaoDolar.Core.Interfaces;
+using Microsoft.Extensions.Logging;
+using Serilog.Context;
 
 namespace Ability.CotacaoDolar.Core.Services;
 
@@ -9,19 +11,39 @@ public class ServicoColetaCotacaoDolar
 {
     private readonly ICotacaoDolarColetor _cotacaoDolarColetor;
     private readonly ICotacaoDolarRepositorio _cotacaoDolarRepositorio;
+    private readonly ILogger<ServicoColetaCotacaoDolar> _logger;
 
-    public ServicoColetaCotacaoDolar(ICotacaoDolarColetor cotacaoDolarColetor, ICotacaoDolarRepositorio cotacaoDolarRepositorio)
+    public ServicoColetaCotacaoDolar(ICotacaoDolarColetor cotacaoDolarColetor, ICotacaoDolarRepositorio cotacaoDolarRepositorio, ILogger<ServicoColetaCotacaoDolar> logger)
     {
         _cotacaoDolarColetor = cotacaoDolarColetor;
         _cotacaoDolarRepositorio = cotacaoDolarRepositorio;
+        _logger = logger;
     }
 
     public async Task ColetarESalvarAsync()
     {
-        var cotacao = await _cotacaoDolarColetor.ColetarCotacaoDolarAsync();
+        using (LogContext.PushProperty("Source", "Worker"))
+        {
+            var cotacao = await _cotacaoDolarColetor.ColetarCotacaoDolarAsync();
 
-        await _cotacaoDolarRepositorio.SalvarAsync(cotacao);
+            var ultimaCotacao = await _cotacaoDolarRepositorio.ObterUltimaCotacaoAsync();
+
+            if (ultimaCotacao is not null && ultimaCotacao.DataHoraColeta == cotacao.DataHoraColeta)
+            {
+                _logger.LogWarning(
+                    "Cotação ignorada por duplicidade. DataHoraColeta: {DataHoraColeta}",
+                    cotacao.DataHoraColeta);
+
+                return;
+            }
+
+            await _cotacaoDolarRepositorio.SalvarAsync(cotacao);
+
+            _logger.LogInformation(
+                "Cotação salva com sucesso | Compra: {Compra} | Venda: {Venda} | Coleta: {DataHora}",
+                cotacao.TaxaCompra,
+                cotacao.TaxaVenda,
+                cotacao.DataHoraColeta);
+        }
     }
-
-
 }

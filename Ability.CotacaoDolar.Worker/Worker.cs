@@ -1,6 +1,9 @@
 using Ability.CotacaoDolar.Core.Entities;
 using Ability.CotacaoDolar.Core.Interfaces;
 using Ability.CotacaoDolar.Core.Services;
+using Ability.CotacaoDolar.Worker.Configurations;
+using Microsoft.Extensions.Options;
+using Serilog.Context;
 
 namespace Ability.CotacaoDolar.Worker
 {
@@ -9,38 +12,41 @@ namespace Ability.CotacaoDolar.Worker
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Worker> _logger;
         private readonly IConfiguration _configuration;
+        private readonly WorkerConfig _config;
 
-        public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger, IConfiguration configuration)
+        public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger, IConfiguration configuration, IOptions<WorkerConfig> options)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
             _configuration = configuration;
+            _config = options.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            using (LogContext.PushProperty("Source", "Worker"))
             {
-                try
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    using var scope = _serviceProvider.CreateScope();
+                    try
+                    {
+                        _logger.LogInformation("Iniciando coleta da cotação do dólar...");
 
-                    var servico = scope.ServiceProvider.GetRequiredService<ServicoColetaCotacaoDolar>();
-                    await servico.ColetarESalvarAsync();
+                        using var scope = _serviceProvider.CreateScope();
 
-                    _logger.LogInformation("Cotação do dólar coletada e salva com sucesso.");
+                        var servico = scope.ServiceProvider.GetRequiredService<ServicoColetaCotacaoDolar>();
+                        await servico.ColetarESalvarAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Erro ao executar a coleta da cotação do dólar: {ex}");
+                    }
 
+                    var minutos = _config.IntervaloMinutos > 0 ? _config.IntervaloMinutos : 10;
+
+                    await Task.Delay(TimeSpan.FromMinutes(minutos), stoppingToken);
                 }
-                catch (Exception ex)
-                {
-
-                    _logger.LogError($"Erro ao coletar cotação: {ex}");
-                }
-
-                var minutos = _configuration.GetValue<int>("Worker:IntervaloMinutos");
-                await Task.Delay(TimeSpan.FromMinutes(minutos), stoppingToken);
             }
-            
         }
     }
 }
