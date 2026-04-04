@@ -94,6 +94,67 @@ A aplicação utiliza Serilog com envio de logs para o Seq, permitindo:
 - Análise de erros
 - Rastreamento de execução
 
+## 🔎 Como filtrar logs no Seq
+
+Após subir a aplicação com Docker Compose, os logs podem ser visualizados no Seq.
+
+Acesse:
+
+```text
+http://localhost:5341
+```
+
+O Seq permite pesquisar e filtrar logs de forma simples e poderosa.
+
+### Exemplos de filtros úteis
+
+Exibir apenas erros
+```sql
+Level = 'Error'
+```
+
+Exibir apenas warnings
+```sql
+Level = 'Warning'
+```
+
+Exibir apenas logs de informação
+```sql
+Level = 'Information'
+```
+
+Pesquisar mensagens contendo a palavra "cotação"
+```sql
+@Message like '%cotação%'
+```
+
+Filtrar logs da API por rota
+```sql
+RequestPath = '/api/cotacao-dolar/ultima'
+```
+
+Filtrar logs com taxa de compra maior que 5.15
+```
+TaxaCompra > 5.15
+```
+
+Exibir apenas erros e warnings
+```sql
+Level = 'Error' or Level = 'Warning'
+```
+
+### Observação
+
+Os logs são estruturados com Serilog, o que permite filtrar não apenas por texto, mas também por propriedades específicas como:
+
+- Level
+- RequestPath
+- TaxaCompra
+- TaxaVenda
+- DataHoraColeta
+
+Isso facilita bastante a análise do comportamento da aplicação e o diagnóstico de problemas.
+
 ---
 
 # 🗄 Banco de Dados
