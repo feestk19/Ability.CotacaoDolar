@@ -1,6 +1,6 @@
 # 💵 Teste Técnico Ability: Cotação do Dólar
 
-Aplicação desenvolvida em .NET 8 para coleta, armazenamento e consulta da cotação do dólar, utilizando arquitetura limpa, processamento assíncrono com Worker Service e observabilidade com Serilog + Seq.
+Aplicação desenvolvida em .NET 8 para coleta, armazenamento e consulta da cotação do dólar, utilizando Clean Architecture, processamento assíncrono com Worker Service e observabilidade com Serilog + Seq.
 
 ---
 
@@ -50,7 +50,9 @@ O Worker executa continuamente:
 
 O intervalo de execução do Worker pode ser alterado via variável de ambiente:
 
+```yml
 Worker__IntervaloMinutos: 5
+```
 
 Por padrão: 60 minutos
 
