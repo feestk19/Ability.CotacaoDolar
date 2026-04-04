@@ -27,6 +27,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICotacaoDolarRepositorio, CotacaoDolarRepositorio>();
         services.AddScoped<ServicoColetaCotacaoDolar>();
+        services.AddScoped<ServicoConsultaCotacaoDolar>();
 
         services.AddHttpClient<ICotacaoDolarColetor, CotacaoDolarBancoCentralColetor>();
 
