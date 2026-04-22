@@ -1,4 +1,4 @@
-# 💵 Teste Técnico Ability: Cotação do Dólar
+# 💵 API: Cotação de Dólar
 
 Aplicação desenvolvida em .NET 8 para coleta, armazenamento e consulta da cotação do dólar, utilizando Clean Architecture, processamento assíncrono com Worker Service e observabilidade com Serilog + Seq.
 
